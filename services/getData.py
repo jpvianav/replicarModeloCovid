@@ -10,7 +10,8 @@ def getDataCol():
 
 def getDataWorld():
     try:
-        data = pd.read_csv('https://opendata.ecdc.europa.eu/covid19/casedistribution/csv')    
+        data = pd.read_csv('https://opendata.ecdc.europa.eu/covid19/casedistribution/csv')
+        print('Data from the ECDC retieved.')    
         return data
     except:
         raise Exception('It was not possible to retrieve data from the european comission, please check internet connection of any change in the site address...')

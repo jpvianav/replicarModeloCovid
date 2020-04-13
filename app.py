@@ -86,7 +86,10 @@ for measi in measurements:
 p = covariates.shape[1] - 1
 forecast = 0
 
-N2 = 85 # Increase this for a further forecast
+# ------------------------------------------------------------------
+#Forecaste length: This number include the days with data and the days to forecast. 
+N2 = 80 # Increase this for a further forecast
+# ------------------------------------------------------------------
 
 
 dates = {}
@@ -288,6 +291,7 @@ for i in range(nCountries):
 	N = stan_data['N'][i]
 	country = countries[i]
 	datesN = dates[country]
+	datesN2 = np.hstack([datesN, np.array([datesN[-1] + np.timedelta64(N2 - N, 'D') for  j in range(1, N2 - N +1)])])
 
 	#Casos!
 	predictedcases= (prediction[:,:,i]).mean(axis=0)
@@ -296,8 +300,8 @@ for i in range(nCountries):
 
 	fig, axs = plt.subplots(1)
 	axs.plot(datesN, predictedcases[0:N], label = 'Prediction')
-	axs.plot(datesN, predicted_cases_li[0:N], label = '0.250')
-	axs.plot(datesN, predicted_cases_ui[0:N], label = '0.725')
+	axs.plot(datesN, predicted_cases_li[0:N], label = '0.025')
+	axs.plot(datesN, predicted_cases_ui[0:N], label = '0.975')
 	axs.legend()
 	axs.set_title('Predicted case for ' + countries[i])
 	plt.xticks(rotation = 45)
@@ -305,15 +309,15 @@ for i in range(nCountries):
 	plt.close(fig)
 
 	# deaths!
-	predictedeaths = (estimateddeaths[:,0:N,i]).mean(axis=0)
+	predictedeaths = (estimateddeaths[:,:,i]).mean(axis=0)
 	predictedeathsLi = np.quantile(estimateddeaths[:,:,i], q=0.025, axis= 0)
 	predictedeathsUi = np.quantile(estimateddeaths[:,:,i], q=0.975, axis= 0)
 	actualDeaths = stan_data['deaths'][:N, i]
 
 	fig, axs = plt.subplots(1)
-	axs.plot(datesN, predictedeaths[0:N], label = 'Prediction')
-	axs.plot(datesN, predictedeathsLi[0:N], label = '0.250')
-	axs.plot(datesN, predictedeathsUi[0:N], label = '0.725')
+	axs.plot(datesN, predictedeaths[0:N], 'r',  label = 'Prediction')
+	axs.plot(datesN, predictedeathsLi[0:N], label = '0.025')
+	axs.plot(datesN, predictedeathsUi[0:N], label = '0.975')
 	axs.bar(datesN, actualDeaths, label= 'actual')
 	axs.legend()
 	axs.set_title('Predicted deaths for ' + countries[i])
@@ -326,7 +330,5 @@ for i in range(nCountries):
 	dataOut[country] = {
 		'cases': predictedcases,
 		'deaths': predictedeaths, 
-		'dates': datesN #Fechas en las que hay regresion.
+		'dates': datesN2 #Fechas.
 		}
-
-

@@ -33,5 +33,6 @@ env
 *.utf8.md
 *.knit.md
 
-
+#Carpetas de trabajo.
 .vscode
+.env
